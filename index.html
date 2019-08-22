@@ -1,0 +1,109 @@
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous">
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.loadtemplate/1.5.10/jquery.loadTemplate.js" integrity="sha256-867falIbrhHpVSydteOpbJwaSvVuEkNfuNHOROGiIhQ=" crossorigin="anonymous"></script>
+
+
+<script type="text/html" id="template">
+    <div class="cd-timeline__block">
+        <div class="cd-timeline__img cd-timeline__img--picture">
+            <i class="material-icons" data-content="icon"></i>
+        </div> <!-- cd-timeline__img -->
+        
+        <div class="cd-timeline__content text-component">
+            <h2 data-content="title"></h2>
+            <p class="color-contrast-medium" data-content="content"></p>
+    
+            <div class="flex justify-between items-center">
+                <span class="cd-timeline__date" data-content="date"></span>
+            </div>
+        </div> <!-- cd-timeline__content -->
+    </div> <!-- cd-timeline__block -->
+</script>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="./timeline.css" rel="stylesheet">
+
+<section class="cd-timeline js-cd-timeline">
+    <div class="container max-width-lg cd-timeline__container">
+    </div>
+</section> <!-- cd-timeline -->
+
+<script>
+!function(){function e(e){this.element=e,this.blocks=this.element.getElementsByClassName("cd-timeline__block"),this.images=this.element.getElementsByClassName("cd-timeline__img"),this.contents=this.element.getElementsByClassName("cd-timeline__content"),this.offset=.8,this.hideBlocks()}e.prototype.hideBlocks=function(){if(!(!1 in document.documentElement))for(var e,t=this,n=0;n<this.blocks.length;n++)e=n,t.blocks[e].getBoundingClientRect().top>window.innerHeight*t.offset&&(t.images[e].classList.add("cd-timeline__img--hidden"),t.contents[e].classList.add("cd-timeline__content--hidden"))},e.prototype.showBlocks=function(){if(!(!1 in document.documentElement))for(var e,t=this,n=0;n<this.blocks.length;n++)e=n,t.contents[e].classList.contains("cd-timeline__content--hidden")&&t.blocks[e].getBoundingClientRect().top<=window.innerHeight*t.offset&&(t.images[e].classList.add("cd-timeline__img--bounce-in"),t.contents[e].classList.add("cd-timeline__content--bounce-in"),t.images[e].classList.remove("cd-timeline__img--hidden"),t.contents[e].classList.remove("cd-timeline__content--hidden"))};var t,n=document.getElementsByClassName("js-cd-timeline"),i=[],s=!1;if(0<n.length){for(var o=0;o<n.length;o++)t=o,i.push(new e(n[t]));window.addEventListener("scroll",function(e){s||(s=!0,window.requestAnimationFrame?window.requestAnimationFrame(c):setTimeout(c,250))})}function c(){i.forEach(function(e){e.showBlocks()}),s=!1}}();
+</script>
+
+<script>
+    $.ajax({
+        url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user=erbowl',
+        cache: false,
+        datatype: 'json',
+        success: function(json) {
+            {{/*  イベントの作成  */}}
+
+            json.sort(function(a,b){
+                return a.epoch_second - b.epoch_second;
+            })
+
+            console.log(json);
+            var events = [];
+            var used = {};
+            var cnt = 0;
+            https://atcoder.jp/contests/abc138/tasks/abc138_b
+            json.forEach(function(e){
+                if(e.result === "AC"){
+                    cnt++;
+                    if(cnt%100==0){
+                        events.push({icon: "trending_up",title: cnt+"AC", content: problemURL(e)+"<br>"+submissionURL(e), date: new Date(e.epoch_second*1000)});
+                    }
+                    if(!used[e.language]){
+                        events.push({icon: "fiber_new",title: "First AC of "+e.language, content: problemURL(e)+"<br>"+submissionURL(e), date: new Date(e.epoch_second*1000)});
+                        used[e.language] = 1;
+                    }
+                }
+            });
+
+            events.sort(function(a,b){
+                return b.date - a.date;
+            }).forEach(function(e){
+                appendContent(e);
+            })
+            {{/*  events.forEach();  */}}
+        }
+    });
+
+    function problemURL(e){
+        return "https://atcoder.jp/"+e.contest_id+"/tasks/"+e.problem_id;
+    }
+    function submissionURL(e){
+        return "https://atcoder.jp/contests/"+e.contest_id+"/submissions/"+e.id;
+    }
+    
+
+
+    function appendContent(obj){
+        $("section > div").loadTemplate(
+            $("#template"),
+            {
+                "icon": obj.icon,
+                "title" : obj.title,
+                "content": obj.content,
+                "date": obj.date
+            },
+            {
+                append: true 
+            }
+        );
+    }    
+</script>
+    
+<style>
+body > section {
+    min-height: 100%;
+}
+</style>
