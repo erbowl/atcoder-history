@@ -7,11 +7,12 @@
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.loadtemplate/1.5.10/jquery.loadTemplate.js" integrity="sha256-867falIbrhHpVSydteOpbJwaSvVuEkNfuNHOROGiIhQ=" crossorigin="anonymous"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css?family=Playfair+Display&display=swap" rel="stylesheet">
 
 <script type="text/html" id="template">
     <div class="cd-timeline__block">
-        <div class="cd-timeline__img cd-timeline__img--picture">
+        <div class="cd-timeline__img cd-timeline__img--picture" data-class="color">
             <i class="material-icons" data-content="icon"></i>
         </div> <!-- cd-timeline__img -->
         
@@ -29,6 +30,13 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <link href="./timeline.css" rel="stylesheet">
 
+<div class="center-form">
+    <h1>AtCoder Achievement</h1>
+    <form action="" method="GET">
+        <input id="input-name" name="user" type="text" placeholder="erbowl">
+        <button id="submit" type="submit">View</button>
+    </form>
+</div>
 <section class="cd-timeline js-cd-timeline">
     <div class="container max-width-lg cd-timeline__container">
     </div>
@@ -39,32 +47,64 @@
 </script>
 
 <script>
+    $("#input-name").val(getParam("user"));
+
     $.ajax({
-        url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user=erbowl',
+        url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user='+getParam("user"),
         cache: false,
         datatype: 'json',
         success: function(json) {
             {{/*  イベントの作成  */}}
-
-            json.sort(function(a,b){
-                return a.epoch_second - b.epoch_second;
-            })
-
-            console.log(json);
             var events = [];
             var used = {};
             var cnt = 0;
-            https://atcoder.jp/contests/abc138/tasks/abc138_b
-            json.forEach(function(e){
+            var first = false;
+
+            json.sort(function(a,b){
+                return a.epoch_second - b.epoch_second;
+            }).forEach(function(e){
                 if(e.result === "AC"){
+                    if(!first){
+                        events.push({
+                            icon: "trending_up",
+                            title: "Everything started from here.",
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000-1),
+                            color: "green"
+                        });
+                        first = true;
+                    }
+
                     cnt++;
                     if(cnt%100==0){
-                        events.push({icon: "trending_up",title: cnt+"AC", content: problemURL(e)+"<br>"+submissionURL(e), date: new Date(e.epoch_second*1000)});
+                        events.push({
+                            icon: "trending_up",
+                            title: "Achieved "+cnt+"AC",
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "green"
+                        });
                     }
+
                     if(!used[e.language]){
-                        events.push({icon: "fiber_new",title: "First AC of "+e.language, content: problemURL(e)+"<br>"+submissionURL(e), date: new Date(e.epoch_second*1000)});
-                        used[e.language] = 1;
+                        events.push({
+                            icon: "star",
+                            title: "First AC of "+e.language,
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "yellow"
+                        });
+                        used[e.language] = 0;
+                    }else if(used[e.language]%100==0){
+                        events.push({
+                            icon: "star",
+                            title: used[e.language]+"AC by "+e.language,
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "yellow"
+                        });
                     }
+                    used[e.language]++;
                 }
             });
 
@@ -73,19 +113,15 @@
             }).forEach(function(e){
                 appendContent(e);
             })
-            {{/*  events.forEach();  */}}
         }
     });
 
     function problemURL(e){
-        return "https://atcoder.jp/"+e.contest_id+"/tasks/"+e.problem_id;
+        return "<a href="+"https://atcoder.jp/contests/"+e.contest_id+"/tasks/"+e.problem_id+">"+e.problem_id+"</a>";
     }
     function submissionURL(e){
-        return "https://atcoder.jp/contests/"+e.contest_id+"/submissions/"+e.id;
+        return "<a href="+"https://atcoder.jp/contests/"+e.contest_id+"/submissions/"+e.id+">submission link</a>";
     }
-    
-
-
     function appendContent(obj){
         $("section > div").loadTemplate(
             $("#template"),
@@ -93,17 +129,67 @@
                 "icon": obj.icon,
                 "title" : obj.title,
                 "content": obj.content,
-                "date": obj.date
+                "date": moment(obj.date).format("YYYY/MM/DD"),
+                "color": obj.color
             },
             {
                 append: true 
             }
         );
-    }    
+    }
+    function getParam(name) {
+        url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
 </script>
     
 <style>
+i {
+    color: white;
+}
+.center-form {
+    text-align: center;
+    padding: 10px 0px;
+    background-color: black;
+}
+.center-form h1 {
+    color:  white;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 10px;
+}
+
+.cd-timeline__block .yellow{
+    background-color: yellowgreen;
+}
+.cd-timeline__block .green{
+    background-color: green;
+}
+
+#input-name, #submit {
+    border-style: none;
+    border-radius: 0.25em;
+    padding: 0 20px;
+    text-align: center;
+    height: 25px;
+}
+#submit {
+    background-color: gainsboro;
+}
+
 body > section {
     min-height: 100%;
+}
+p.color-contrast-medium {
+    word-break: break-all;
+}
+@media screen and (max-width:640px) { 
+    .cd-timeline__content.text-component {
+        overflow: hidden;
+    }
 }
 </style>
