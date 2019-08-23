@@ -38,7 +38,7 @@
     </form>
 </div>
 <section class="cd-timeline js-cd-timeline">
-    <div class="container max-width-lg cd-timeline__container">
+    <div id="timeline" style="display: none;" class="container max-width-lg cd-timeline__container">
     </div>
 </section> <!-- cd-timeline -->
 
@@ -47,18 +47,22 @@
 </script>
 
 <script>
-    $("#input-name").val(getParam("user"));
+    var user = getParam("user");
+    $("#input-name").val(user);
+
+    if(!user){ exit; }
 
     $.ajax({
-        url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user='+getParam("user"),
+        url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user='+user,
         cache: false,
         datatype: 'json',
         success: function(json) {
-            {{/*  イベントの作成  */}}
             var events = [];
             var used = {};
             var cnt = 0;
             var first = false;
+
+            $("#timeline").show();
 
             json.sort(function(a,b){
                 return a.epoch_second - b.epoch_second;
