@@ -90,83 +90,80 @@
     </section> <!-- cd-timeline -->
     
     <script>
-    !function(){function e(e){this.element=e,this.blocks=this.element.getElementsByClassName("cd-timeline__block"),this.images=this.element.getElementsByClassName("cd-timeline__img"),this.contents=this.element.getElementsByClassName("cd-timeline__content"),this.offset=.8,this.hideBlocks()}e.prototype.hideBlocks=function(){if(!(!1 in document.documentElement))for(var e,t=this,n=0;n<this.blocks.length;n++)e=n,t.blocks[e].getBoundingClientRect().top>window.innerHeight*t.offset&&(t.images[e].classList.add("cd-timeline__img--hidden"),t.contents[e].classList.add("cd-timeline__content--hidden"))},e.prototype.showBlocks=function(){if(!(!1 in document.documentElement))for(var e,t=this,n=0;n<this.blocks.length;n++)e=n,t.contents[e].classList.contains("cd-timeline__content--hidden")&&t.blocks[e].getBoundingClientRect().top<=window.innerHeight*t.offset&&(t.images[e].classList.add("cd-timeline__img--bounce-in"),t.contents[e].classList.add("cd-timeline__content--bounce-in"),t.images[e].classList.remove("cd-timeline__img--hidden"),t.contents[e].classList.remove("cd-timeline__content--hidden"))};var t,n=document.getElementsByClassName("js-cd-timeline"),i=[],s=!1;if(0<n.length){for(var o=0;o<n.length;o++)t=o,i.push(new e(n[t]));window.addEventListener("scroll",function(e){s||(s=!0,window.requestAnimationFrame?window.requestAnimationFrame(c):setTimeout(c,250))})}function c(){i.forEach(function(e){e.showBlocks()}),s=!1}}();
-    </script>
-    
-    <script>
         var user = getParam("user");
         $("#input-name").val(user);
     
-        if(!user){ exit; }
-    
-        $.ajax({
-            url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user='+user,
-            cache: false,
-            datatype: 'json',
-            success: function(json) {
-                var events = [];
-                var used = {};
-                var cnt = 0;
-                var first = false;
-    
-                $("#timeline").show();
-    
-                json.sort(function(a,b){
-                    return a.epoch_second - b.epoch_second;
-                }).forEach(function(e){
-                    if(e.result === "AC"){
-                        if(!first){
-                            events.push({
-                                icon: "trending_up",
-                                title: "Everything started from here.",
-                                content: problemURL(e)+"<br>"+submissionURL(e),
-                                date: new Date(e.epoch_second*1000-1),
-                                color: "green"
-                            });
-                            first = true;
-                        }
-    
-                        cnt++;
-                        if(cnt%100==0){
-                            events.push({
-                                icon: "trending_up",
-                                title: "Achieved "+cnt+"AC",
-                                content: problemURL(e)+"<br>"+submissionURL(e),
-                                date: new Date(e.epoch_second*1000),
-                                color: "green"
-                            });
-                        }
-    
-                        if(!used[e.language]){
-                            events.push({
-                                icon: "star",
-                                title: "First AC of "+e.language,
-                                content: problemURL(e)+"<br>"+submissionURL(e),
-                                date: new Date(e.epoch_second*1000),
-                                color: "yellow"
-                            });
-                            used[e.language] = 0;
-                        }else if(used[e.language]%100==0){
-                            events.push({
-                                icon: "star",
-                                title: used[e.language]+"AC by "+e.language,
-                                content: problemURL(e)+"<br>"+submissionURL(e),
-                                date: new Date(e.epoch_second*1000),
-                                color: "yellow"
-                            });
-                        }
-                        used[e.language]++;
+        if(user){
+            $.ajax({
+                url: 'https://kenkoooo.com/atcoder/atcoder-api/results?user='+user,
+                cache: false,
+                datatype: 'json',
+                success: function(json) { make_events(json) }
+            });
+        }
+        
+        function make_events(json){
+            var events = [];
+            var used = {};
+            var cnt = 0;
+            var first = false;
+
+            $("#timeline").show();
+
+            json.sort(function(a,b){
+                return a.epoch_second - b.epoch_second;
+            }).forEach(function(e){
+                if(e.result === "AC"){
+                    if(!first){
+                        events.push({
+                            icon: "trending_up",
+                            title: "Everything started from here.",
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000-1),
+                            color: "green"
+                        });
+                        first = true;
                     }
-                });
-    
-                events.sort(function(a,b){
-                    return b.date - a.date;
-                }).forEach(function(e){
-                    appendContent(e);
-                })
-            }
-        });
-    
+
+                    cnt++;
+                    if(cnt%100==0){
+                        events.push({
+                            icon: "trending_up",
+                            title: "Achieved "+cnt+"AC",
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "green"
+                        });
+                    }
+
+                    if(!used[e.language]){
+                        events.push({
+                            icon: "star",
+                            title: "First AC of "+e.language,
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "yellow"
+                        });
+                        used[e.language] = 0;
+                    }else if(used[e.language]%100==0){
+                        events.push({
+                            icon: "star",
+                            title: used[e.language]+"AC by "+e.language,
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "yellow"
+                        });
+                    }
+                    used[e.language]++;
+                }
+            });
+
+            events.sort(function(a,b){
+                return b.date - a.date;
+            }).forEach(function(e){
+                appendContent(e);
+            })
+        }
         function problemURL(e){
             return "<a href="+"https://atcoder.jp/contests/"+e.contest_id+"/tasks/"+e.problem_id+">"+e.problem_id+"</a>";
         }
@@ -180,7 +177,7 @@
                     "icon": obj.icon,
                     "title" : obj.title,
                     "content": obj.content,
-                    "date": moment(obj.date).format("YYYY/MM/DD"),
+                    "date": moment(obj.date).format("YYYY/MM/DD HH:mm:ss"),
                     "color": obj.color
                 },
                 {
