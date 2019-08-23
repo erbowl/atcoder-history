@@ -51,10 +51,23 @@
         }
         
         .cd-timeline__block .yellow{
-            background-color: yellowgreen;
+            background-color: gold;
         }
         .cd-timeline__block .green{
             background-color: green;
+        }
+        .cd-timeline__block .red{
+            background-color: #f44336;
+        }
+        .cd-timeline__block .blue{
+            background-color: cyan;
+        }
+        span.ac {
+            background-color: #5cb85c;
+            color: white;
+            border-radius: .25em;
+            font-weight: bold;
+            padding: 0 10px;
         }
         
         #input-name, #submit {
@@ -112,6 +125,8 @@
             var used = {};
             var cnt = 0;
             var first = false;
+            var points = 0;
+            var milestone = 3;
 
             $("#timeline").show();
 
@@ -121,7 +136,7 @@
                 if(e.result === "AC"){
                     if(!first){
                         events.push({
-                            icon: "trending_up",
+                            icon: "navigation",
                             title: "Everything started from here.",
                             content: problemURL(e)+"<br>"+submissionURL(e),
                             date: new Date(e.epoch_second*1000-1),
@@ -129,12 +144,28 @@
                         });
                         first = true;
                     }
+                    // how to exclude marathon...
+                    if (e.point <= 3000) {
+                        points += e.point;
+                        var quo = points - points%(10**milestone);
+                        if( points - e.point < quo && points >= quo ){
+                            events.push({
+                                icon: "emoji_flags",
+                                title: "Reached "+quo+" pt in total",
+                                content: problemURL(e)+"<br>"+submissionURL(e),
+                                date: new Date(e.epoch_second*1000),
+                                color: "red"
+                            });
+                            milestone++;
+                        }
+                    }
 
+                    
                     cnt++;
                     if(cnt%100==0){
                         events.push({
                             icon: "trending_up",
-                            title: "Achieved "+cnt+"AC",
+                            title: "Achieved "+cnt+" <span class='ac'>AC</span>",
                             content: problemURL(e)+"<br>"+submissionURL(e),
                             date: new Date(e.epoch_second*1000),
                             color: "green"
@@ -144,16 +175,16 @@
                     if(!used[e.language]){
                         events.push({
                             icon: "star",
-                            title: "First AC of "+e.language,
+                            title: "First <span class='ac'>AC</span> of "+e.language,
                             content: problemURL(e)+"<br>"+submissionURL(e),
                             date: new Date(e.epoch_second*1000),
-                            color: "yellow"
+                            color: "blue"
                         });
                         used[e.language] = 0;
                     }else if(used[e.language]%100==0){
                         events.push({
-                            icon: "star",
-                            title: used[e.language]+"AC by "+e.language,
+                            icon: "emoji_events",
+                            title: used[e.language]+" <span class='ac'>AC</span> by "+e.language,
                             content: problemURL(e)+"<br>"+submissionURL(e),
                             date: new Date(e.epoch_second*1000),
                             color: "yellow"
