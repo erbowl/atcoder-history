@@ -3,6 +3,8 @@
     <meta name="theme-color" content="#000000">
     <meta property="og:title" content="AtCoder Achievement">
     <meta property="og:description" content="Show achievement of AtCoder">
+    <meta property="og:image" content="https://atcoder-achievement.erbowl.com/image.jpg">
+
     <meta name="twitter:creator" content="@erb_owl">
     <meta name="twitter:card" content="summary">
 
@@ -127,6 +129,7 @@
             var first = false;
             var points = 0;
             var milestone = 3;
+            var unique = {};
 
             $("#timeline").show();
 
@@ -134,6 +137,10 @@
                 return a.epoch_second - b.epoch_second;
             }).forEach(function(e){
                 if(e.result === "AC"){
+                    if(unique[e.problem_id]){
+                        return;
+                    }
+                    unique[e.problem_id] = true;
                     if(!first){
                         events.push({
                             icon: "navigation",
@@ -157,6 +164,7 @@
                                 color: "red"
                             });
                             milestone++;
+                            milestone = Math.min(5,milestone);
                         }
                     }
 
