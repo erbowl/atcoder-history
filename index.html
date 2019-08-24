@@ -72,17 +72,16 @@
             padding: 0 10px;
         }
         #input-name {
-            width: 150px;
+            width: 200px;
         }
-        #input-name, #submit, #input-unique {
+        #input-name, #submit {
             border-style: none;
             border-radius: 0.25em;
-            padding: 0 10px;
+            padding: 0 20px;
             text-align: center;
             height: 25px;
-            margin: 5px 0px;
         }
-        #submit, #input-unique {
+        #submit {
             background-color: gainsboro;
         }
         
@@ -105,7 +104,6 @@
         <form action="" method="GET">
             <input id="input-name" name="user" type="text" placeholder="User ID">
             <button id="submit" type="submit">View</button>
-            <button id="input-unique" name="unique" value="on" type="submit">Unique AC</button>
         </form>
     </div>
     <section class="cd-timeline js-cd-timeline">
@@ -134,7 +132,7 @@
             var points = 0;
             var milestone = 3;
             var unique = {};
-            var force_unique = getParam("unique");
+            var unique_language = {};
 
             $("#timeline").show();
 
@@ -142,10 +140,6 @@
                 return a.epoch_second - b.epoch_second;
             }).forEach(function(e){
                 if(e.result === "AC"){
-                    if(unique[e.problem_id] && force_unique){
-                        return;
-                    }
-                    unique[e.problem_id] = true;
                     if(!first){
                         events.push({
                             icon: "navigation",
@@ -157,7 +151,7 @@
                         first = true;
                     }
                     // how to exclude marathon...
-                    if (e.point <= 3000) {
+                    if (e.point <= 3000 && !unique[e.problem_id]) {
                         points += e.point;
                         var quo = points - points%(10**milestone);
                         if( points - e.point < quo && points >= quo ){
@@ -173,37 +167,47 @@
                         }
                     }
 
-                    
-                    cnt++;
-                    if(cnt%100==0){
-                        events.push({
-                            icon: "trending_up",
-                            title: "Achieved "+cnt+" <span class='ac'>AC</span>",
-                            content: problemURL(e)+"<br>"+submissionURL(e),
-                            date: new Date(e.epoch_second*1000),
-                            color: "green"
-                        });
+                    if ( !unique[e.problem_id] ){
+                        cnt++;
+                        if(cnt%100==0){
+                            events.push({
+                                icon: "trending_up",
+                                title: "Achieved "+cnt+" <span class='ac'>AC</span>",
+                                content: problemURL(e)+"<br>"+submissionURL(e),
+                                date: new Date(e.epoch_second*1000),
+                                color: "green"
+                            });
+                        }
                     }
 
                     if(!used[e.language]){
-                        events.push({
-                            icon: "star",
-                            title: "First <span class='ac'>AC</span> of "+e.language,
-                            content: problemURL(e)+"<br>"+submissionURL(e),
-                            date: new Date(e.epoch_second*1000),
-                            color: "blue"
-                        });
                         used[e.language] = 0;
-                    }else if(used[e.language]%100==0){
-                        events.push({
-                            icon: "emoji_events",
-                            title: used[e.language]+" <span class='ac'>AC</span> by "+e.language,
-                            content: problemURL(e)+"<br>"+submissionURL(e),
-                            date: new Date(e.epoch_second*1000),
-                            color: "yellow"
-                        });
+                        unique_language[e.language] = {};
                     }
-                    used[e.language]++;
+
+                    if(!unique_language[e.language][e.problem_id]){
+                        used[e.language]++;
+                        if(used[e.language]==1){
+                            events.push({
+                                icon: "star",
+                                title: "First <span class='ac'>AC</span> of "+e.language,
+                                content: problemURL(e)+"<br>"+submissionURL(e),
+                                date: new Date(e.epoch_second*1000),
+                                color: "blue"
+                            });
+                        }else if(used[e.language]%100==0){
+                            events.push({
+                                icon: "emoji_events",
+                                title: used[e.language]+" <span class='ac'>AC</span> by "+e.language,
+                                content: problemURL(e)+"<br>"+submissionURL(e),
+                                date: new Date(e.epoch_second*1000),
+                                color: "yellow"
+                            });
+                        }
+                    }
+
+                    unique_language[e.language][e.problem_id] = true;
+                    unique[e.problem_id] = true;
                 }
             });
 
