@@ -71,6 +71,13 @@
             font-weight: bold;
             padding: 0 10px;
         }
+        span.wa {
+            background-color: #F0AD4E;
+            color: white;
+            border-radius: .25em;
+            font-weight: bold;
+            padding: 0 10px;
+        }
         #input-name {
             width: 200px;
         }
@@ -128,6 +135,7 @@
             var events = [];
             var used = {};
             var cnt = 0;
+            var other_cnt = {};
             var first = false;
             var points = 0;
             var milestone = 3;
@@ -208,6 +216,20 @@
 
                     unique_language[e.language][e.problem_id] = true;
                     unique[e.problem_id] = true;
+                }else{
+                    if(!other_cnt[e.result]){
+                        other_cnt[e.result] = 0;
+                    }
+                    other_cnt[e.result]++;
+                    if(other_cnt[e.result]%100==0){
+                        events.push({
+                            icon: "info",
+                            title: "Encountered "+other_cnt[e.result]+" <span class='wa'>"+e.result+"</span>",
+                            content: problemURL(e)+"<br>"+submissionURL(e),
+                            date: new Date(e.epoch_second*1000),
+                            color: "green"
+                        });
+                    }
                 }
             });
 
