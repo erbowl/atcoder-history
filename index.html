@@ -71,15 +71,18 @@
             font-weight: bold;
             padding: 0 10px;
         }
-        
-        #input-name, #submit {
+        #input-name {
+            width: 150px;
+        }
+        #input-name, #submit, #input-unique {
             border-style: none;
             border-radius: 0.25em;
-            padding: 0 20px;
+            padding: 0 10px;
             text-align: center;
             height: 25px;
+            margin: 10px 0px;
         }
-        #submit {
+        #submit, #input-unique {
             background-color: gainsboro;
         }
         
@@ -102,6 +105,7 @@
         <form action="" method="GET">
             <input id="input-name" name="user" type="text" placeholder="User ID">
             <button id="submit" type="submit">View</button>
+            <button id="input-unique" name="unique" value="on" type="submit">Unique AC</button>
         </form>
     </div>
     <section class="cd-timeline js-cd-timeline">
@@ -130,6 +134,7 @@
             var points = 0;
             var milestone = 3;
             var unique = {};
+            var force_unique = getParam("unique");
 
             $("#timeline").show();
 
@@ -137,7 +142,7 @@
                 return a.epoch_second - b.epoch_second;
             }).forEach(function(e){
                 if(e.result === "AC"){
-                    if(unique[e.problem_id]){
+                    if(unique[e.problem_id] && force_unique){
                         return;
                     }
                     unique[e.problem_id] = true;
